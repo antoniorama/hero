@@ -40,7 +40,7 @@ public class Game {
     }
 
     private void processKey(KeyStroke key) throws IOException {
-        arena.processKey(key);
+        arena.processKey(key, screen);
     }
 
     public void run() throws IOException {
