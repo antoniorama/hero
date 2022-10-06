@@ -19,9 +19,9 @@ public class Game {
     private Arena arena;
 
     public Game() {
-        arena = new Arena(40, 20);
+        arena = new Arena(40, 21);
         try {
-            TerminalSize terminalSize = new TerminalSize(40, 20);
+            TerminalSize terminalSize = new TerminalSize(40, 21);
             DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory().setInitialTerminalSize(terminalSize);
             Terminal terminal = terminalFactory.createTerminal();
             this.screen = new TerminalScreen(terminal);
@@ -39,15 +39,15 @@ public class Game {
         this.screen.refresh();
     }
 
-    private void processKey(KeyStroke key) throws IOException {
-        arena.processKey(key, screen);
+    private void processKey(KeyStroke key, TextGraphics graphics) throws IOException {
+        arena.processKey(key, graphics);
     }
 
     public void run() throws IOException {
         while (true) {
             draw();
             KeyStroke key = screen.readInput();
-            processKey(key);
+            processKey(key, screen.newTextGraphics());
             if (key.getKeyType() == KeyType.EOF) break;
             if (key.getKeyType() == KeyType.Character && key.getCharacter() == 'q') screen.close();
         }

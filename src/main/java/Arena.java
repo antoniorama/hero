@@ -20,6 +20,7 @@ public class Arena {
     private List<Wall> walls;
     private List<Coin> coins;
     private List<Monster> monsters;
+    private LifeBar heroLifeBar;
 
     public Arena(int width, int height) {
         this.width = width;
@@ -28,7 +29,9 @@ public class Arena {
         this.walls = createWalls();
         this.coins = createCoins();
         this.monsters = createMonsters();
+        this.heroLifeBar = new LifeBar(3, new Position(0, 20));
     }
+
 
     public boolean canHeroMove(Position position) {
         if (position.getX() < 0) return false;
@@ -48,14 +51,14 @@ public class Arena {
             hero.setPosition(position);
     }
 
-    public void processKey(KeyStroke key, Screen screen) throws IOException {
+    public void processKey(KeyStroke key, TextGraphics graphics) throws IOException {
         if (key.getKeyType() == KeyType.ArrowUp) moveHero(hero.moveUp());
         if (key.getKeyType() == KeyType.ArrowDown) moveHero(hero.moveDown());
         if (key.getKeyType() == KeyType.ArrowRight) moveHero(hero.moveRight());
         if (key.getKeyType() == KeyType.ArrowLeft) moveHero(hero.moveLeft());
         retrieveCoins();
         moveMonsters();
-        verifyMonsterCollisions(screen);
+        verifyMonsterCollisions(graphics);
     }
 
     public void draw(TextGraphics graphics) {
@@ -72,13 +75,15 @@ public class Arena {
         //Monsters
         for (Monster monster : monsters)
             monster.draw(graphics);
+        //LifeBar
+        heroLifeBar.draw(graphics);
     }
 
     private List<Wall> createWalls() {
         List<Wall> walls = new ArrayList<>();
         for (int c = 0; c < width; c++) {
             walls.add(new Wall(c, 0));
-            walls.add(new Wall(c, height - 1));
+            walls.add(new Wall(c, height - 2));
         }
         for (int r = 1; r < height - 1; r++) {
             walls.add(new Wall(0, r));
@@ -92,7 +97,7 @@ public class Arena {
         ArrayList<Coin> coins = new ArrayList<>();
         for (int i = 0; i < 5; i++)
             coins.add(new Coin(random.nextInt(width - 2) + 1,
-                    random.nextInt(height - 2) + 1));
+                    random.nextInt(height - 3) + 1));
         return coins;
     }
 
@@ -110,7 +115,7 @@ public class Arena {
         ArrayList<Monster> monsters = new ArrayList<>();
         for (int i = 0; i < 5; i++)
             monsters.add(new Monster(random.nextInt(width - 2) + 1,
-                    random.nextInt(height - 2) + 1));
+                    random.nextInt(height - 3) + 1));
         return monsters;
     }
 
@@ -128,11 +133,14 @@ public class Arena {
         }
     }
 
-    private void verifyMonsterCollisions(Screen screen) throws IOException {
+    private void verifyMonsterCollisions(TextGraphics graphics) throws IOException {
         for (Monster monster : monsters) {
             if (monster.getPosition().equals(hero.getPosition())) {
-                screen.close();
-                System.out.println("Game Over!");
+                heroLifeBar.remove1Hp();
+                if (heroLifeBar.getValue() == 1) {
+                    System.out.println("Game Over!");
+                    System.exit(0);
+                }
             }
         }
     }
